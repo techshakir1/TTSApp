@@ -1,33 +1,26 @@
-name: Build macOS DMG
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Build Electron App
-        run: npm run build:mac
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CSC_LINK_IGNORE: true
-
-      - name: Upload DMG Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: TTSApp-DMG
-          path: dist/*.dmg
+{
+  "name": "ttsapp",
+  "version": "1.0.0",
+  "description": "Premium Gemini TTS Generator",
+  "author": "Tech Shakir",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-builder --mac --publish never"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.gemini.ttsapp",
+    "productName": "TTSApp",
+    "mac": {
+      "target": ["dmg"]
+    }
+  }
+}
