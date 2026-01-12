@@ -1,26 +1,33 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
-import path from 'path';
-import { fileURLToPath } from 'url';
+name: Build macOS DMG
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-function createWindow() {
-    const win = new BrowserWindow({
-        width: 800,
-        height: 600,
-        titleBarStyle: 'hiddenInset',
-        webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false,
-        },
-        backgroundColor: '#0f172a'
-    });
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-    win.loadFile('src/index.html');
-}
+      - name: Install Dependencies
+        run: npm install
 
-app.whenReady().then(createWindow);
+      - name: Build Electron App
+        run: npm run build:mac
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_LINK_IGNORE: true
 
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') app.quit();
-});
+      - name: Upload DMG Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TTSApp-DMG
+          path: dist/*.dmg
